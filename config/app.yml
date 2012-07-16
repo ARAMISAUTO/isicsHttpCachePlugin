@@ -9,8 +9,3 @@ all:
     port: '6082'
     secret: 'b523f2c7-4c6f-4178-b470-3d99ef5c8974'
 
-prod:
-  isics_http_cache_plugin:
-    esi:
-      enabled:     true
-
