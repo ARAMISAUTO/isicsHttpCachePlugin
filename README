@@ -1,6 +1,6 @@
 # isicsHttpCachePlugin #
 
-Excited by **Symfony2 Http Cache** but still have heavy load projects to maintain under Symfony 1.4?  
+Excited by **Symfony2 Http Cache** but still have heavy load projects to maintain under Symfony 1.4?
 Inspired by Symfony2 (concepts and code), this plugin is for you!
 
 isicsHttpCachePlugin fits to our (basic) actual requirements and doesn't already provides all HTTP cache mechanisms. But feel free to contribute!
@@ -18,7 +18,7 @@ It comes with :
     * `include_component_esi($module_name, $component_name, $vars)`
     * `include_partial_esi($template_name, $vars)`
 *   An invalidation method: `isicsHttpCacheService::invalidate($url_pattern, $method)`
-  
+
 _The new methods are unit tested._
 
 
@@ -27,15 +27,15 @@ _The new methods are unit tested._
 We've made a first benchmark with an homepage between 2 versions with exactly the same cache strategy:
 
 *   a classical version using Symfony cache (optimized, 0 SQL queries)
-    
+
     6 cached components with different TTL and so no cache for action
-    
-*   a version using Varnish 
-    
+
+*   a version using Varnish
+
     TTL for action and 7 ESI tags (1 userbar without caching and the 6 others with different TTL)
     Symfony is still called at each request but only for userbar.
-  
-The benchmark was made with Siege tool.  
+
+The benchmark was made with Siege tool.
 It shows a 10 factor between Varnish and Symfony cache (_400 req/sec vs 40_).
 
 
@@ -44,7 +44,7 @@ It shows a 10 factor between Varnish and Symfony cache (_400 req/sec vs 40_).
 Install the plugin:
 
     $ symfony plugin:install -stability=beta isicsHttpCachePlugin
-    
+
 Enable the plugin in your `/config/ProjectConfiguration.class.php`:
 
     [php]
@@ -58,7 +58,7 @@ Enable the plugin in your `/config/ProjectConfiguration.class.php`:
         ));
       }
     }
-    
+
 For ESI support, enable module and helpers in your application(s) `settings.yml`:
 
     [yml]
@@ -72,29 +72,29 @@ For ESI support, enable module and helpers in your application(s) `settings.yml`
 
 The new helpers `include_component_esi`, `include_partial_esi` are very similar to Symfony ones.
 
-If ESI are enabled (true by default in prod env) and only if a gateway handling ESI is installed (we detect that thanks to a dedicated header), an ESI tag is rendered rather than the content.  
-Rendering the content is the role of a special action.  
+If ESI are enabled (true by default in prod env) and only if a gateway handling ESI is installed (we detect that thanks to a dedicated header), an ESI tag is rendered rather than the content.
+Rendering the content is the role of a special action.
 Else, the content is direclty rendered exactly like with the Symfony helpers.
 
 As of Symfony2, cache expiration and validation mechanisms are supported.
 
-Both helpers accept an optional `cache` argument.  
+Both helpers accept an optional `cache` argument.
 The value has a mixed type:
 
-*   For expiration, simply give a duration in seconds:  
+*   For expiration, simply give a duration in seconds:
 
         [php]
         <?php include_component_esi('news', 'showLatest', array('limit' => 5, 'cache' => 300)) ?>
-        
+
     In this example, the latest news component will be refresh every 5 minutes.
 
-*   For validation, the argument value must be a string.  
+*   For validation, the argument value must be a string.
 
         [php]
-        <?php include_component_esi('news', 'showLatest', array('limit' => 5, 'cache' => 'NewsService') ?>  
-    
-    It corresponds to a class name that must defines one or both static methods `getLastModified()` and `getETag()`:    
-    
+        <?php include_component_esi('news', 'showLatest', array('limit' => 5, 'cache' => 'NewsService') ?>
+
+    It corresponds to a class name that must defines one or both static methods `getLastModified()` and `getETag()`:
+
         [php]
         <?php
 
@@ -107,7 +107,7 @@ The value has a mixed type:
 
         [php]
         <?php
-        
+
         static public function getETag($vars)
         {
           return NewsPeer::computeETag();
@@ -133,28 +133,28 @@ You can test this tool in CLI with a dedicated task:
 *   To clear one url (PURGE method implied):
 
         $ symfony isics-http-cache:invalidate http://www.mydomain.tld/
-    
+
     This will clear homepage cache.
 
 *   Or:
 
         $ symfony isics-http-cache:invalidate --method=BAN http://www.mydomain.tld/.*
-    
+
     This will clear all the pages under this host.
 
 ### Custom HTTP headers ###
 
 The plugin adds custom HTTP headers to ESI components response in order to facilitate granular cache invalidation.
 
-* x-symfony-viewname : This header can be used to invalidate cache objects when a component / partial template has been modified.  Invalidation example (varnish) : 
+* x-symfony-viewname : This header can be used to invalidate cache objects when a component / partial template has been modified.  Invalidation example (varnish) :
 
         ban obj.http.x-symfony-viewname == product/someview
-    
+
 * x-docuri : This header can be used to invalidate cache objects when a document attributes have changed in datastore. Header value is identical to component variable $_docUri. Invalidation example (varnish) :
 
         ban obj.http.x-docuri == product/123
-    
-* x-guid : This header can be used to invalidate the cache object corresponding to the component / partial currently executed. Header value is identical to component variable $_guid. If it is not set, it is automatically generated using uniqid(). Invalidation example (varnish) : 
+
+* x-guid : This header can be used to invalidate the cache object corresponding to the component / partial currently executed. Header value is identical to component variable $_guid. If it is not set, it is automatically generated using uniqid(). Invalidation example (varnish) :
 
         ban obj.http.x-guid == the_guid
 
@@ -175,7 +175,7 @@ A class ripped from https://github.com/timwhitlock/php-varnish to ease cache inv
         $socket->connect();
         $socket->purge('obj.http.x-docuri == myx-docuri-which-goes-well');
         $socket->quit();
-        
+
 
 ### Filter ###
 
@@ -197,8 +197,6 @@ This can be done in your application(s) `app.yml`:
       isics_http_cache_plugin:
         esi:
           enabled:     false
-          allowed_ips: [127.0.0.1]
-          
 
 ### Varnish configuration ###
 
@@ -210,17 +208,17 @@ Exactly like Symfony2, you have to setup Varnish to add a particular header tell
 
     sub vcl_fetch {
         if (beresp.http.Surrogate-Control ~ "ESI/1.0") {
-            set beresp.do_esi = true;    
-            unset beresp.http.Surrogate-Control;        
+            set beresp.do_esi = true;
+            unset beresp.http.Surrogate-Control;
         }
     }
-      
-      
-## Recommandations ##      
+
+
+## Recommandations ##
 
 *   Do not give large vars to ESI helpers since the vars are serialized and passed to the internal action on the url.
-      
-      
+
+
 ## Known issues ##
 
 *   Slots are broken when using ESI.

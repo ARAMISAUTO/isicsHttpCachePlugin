@@ -23,11 +23,6 @@ class BaseisicsHttpCacheESIActions extends sfActions
       throw new sfException('ESI not enabled!');
     }
 
-    if (!in_array($this->request->getRemoteAddress(), $esi_configuration['allowed_ips']))
-    {
-      throw new sfException(sprintf('IP %s not allowed!', $this->request->getRemoteAddress()));
-    }
-
     $this->vars = unserialize($this->request->getParameter('vars'));
 
     if (isset($this->vars['cache']))
